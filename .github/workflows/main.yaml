@@ -1,21 +1,27 @@
-name: Check remote host and push report
+name: GitHubActions
 
-on:
-  push:
-    branches:
-    - main
+on: [pull_request]
 
 jobs:
-  prepare:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install netcat
-        run: sudo apt update && sudo apt install -y netcat
-      - run: echo "netcat has been installed"
-      - run: |
-          nc -z -v -w2 onliner.by 443 > nc_report.log 2>&1
-          ls -la
-      - name: Upload report
-        uses: actions/upload-artifact@v2
-        with:
-          path: nc_report.log
+    - name: Git clone my repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v13.1
+
+    - name: Find tabs in changed files
+      run: |
+        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          grep -P "\t" $file >> report.log 2>&1
+        done
+
+    - name: Upload report
+      uses: actions/upload-artifact@v2
+      with:
+        path: report.log
