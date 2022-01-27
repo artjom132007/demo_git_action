@@ -1,4 +1,4 @@
-name: GitHubActions
+name: GitActions
 
 on: [pull_request]
 
